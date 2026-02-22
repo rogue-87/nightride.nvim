@@ -25,19 +25,20 @@ workflow, allowing you to listen to high-quality electronic music while coding.
 
 Features:
 - Stream from 7 different nightride.fm stations
-- Volume control from within Neovim
+- Seamless volume control via mpv IPC (no stream restart)
 - Status line integration 
 - Station selection menu
 - Configurable keybindings
-- Support for ffplay and VLC media players
+- Support for mpv (recommended), ffplay, and VLC media players
 
 ================================================================================
 REQUIREMENTS                                             *nightride-requirements*
 
 - Neovim 0.7.0 or later
-- One of the following audio players:
-  - ffplay (recommended, part of FFmpeg)
-  - VLC media player
+- One of the following audio players (in order of preference):
+  - mpv (recommended - seamless volume control via IPC)
+  - ffplay (part of FFmpeg - volume changes restart stream)
+  - VLC media player (volume changes restart stream)
 - Internet connection for streaming
 
 ================================================================================
@@ -45,28 +46,33 @@ INSTALLATION                                             *nightride-installation
 
 Using lazy.nvim: >
     {
-        'rogue-87/nightride.nvim',
-        config = function()
-            require('nightride').setup()
-        end
+        player = 'mpv',
+        default_station = 'nightride',
+        default_volume = 60,
+        volume_step = 10,
+        keymaps = {
+            toggle = '<leader>nt',
+            select = '<leader>ns',
+            volume_up = '<leader>n+',
+            volume_down = '<leader>n-'
+        }
     }
-<
 
-Using packer.nvim: >
-    use {
-        'rogue-87/nightride.nvim',
-        config = function()
-            require('nightride').setup()
-        end
-    }
-<
+    player              Audio player preference                   *nightride-player*
+                      Choices: 'mpv' | 'ffplay' | 'vlc' | 'auto'
+                      Default: 'auto'
 
-Using vim-plug: >
-    Plug 'rogue-87/nightride.nvim'
-<
-Then add to your init.lua: >
-    require('nightride').setup()
-<
+    default_station     Station to play on start                *nightride-default_station*
+                      Default: 'nightride'
+
+    default_volume      Initial volume (0-100)                  *nightride-default_volume*
+                      Default: 50
+
+    volume_step         Volume adjustment increment              *nightride-volume_step*
+                      Default: 5
+
+    keymaps             Key mapping configuration                *nightride-keymaps*
+                      See |nightride-keybindings| for details
 
 ================================================================================
 CONFIGURATION                                           *nightride-configuration*
@@ -74,7 +80,7 @@ CONFIGURATION                                           *nightride-configuration
 Default configuration: >
     require('nightride').setup({
         -- Audio player preference
-        player = 'auto',  -- 'ffplay', 'vlc', 'auto'
+        player = 'auto',  -- 'mpv', 'ffplay', 'vlc', 'auto'
         
         -- Default station
         default_station = 'nightride',
@@ -104,9 +110,10 @@ Configuration Options:
 
 *nightride-config-player*
     player (string): Audio player to use
-    - 'auto': Automatically detect available player (ffplay > vlc)
-    - 'ffplay': Use ffplay (recommended)
-    - 'vlc': Use VLC media player
+    - 'auto': Automatically detect available player (mpv > ffplay > vlc)
+    - 'mpv': Use mpv (recommended - seamless volume via IPC)
+    - 'ffplay': Use ffplay (volume changes restart stream)
+    - 'vlc': Use VLC media player (volume changes restart stream)
 
 *nightride-config-default-station*
     default_station (string): Station to play when toggling from stopped state
@@ -243,19 +250,13 @@ For custom status lines, use the statusline() function: >
     local nightride_status = require('nightride').statusline()
 <
 
-Lualine Integration ~
+The `statusline()` function returns:
+- Empty string when not playing
+- `"♪ [Station Name] 75%"` when playing (format configurable)
 
-Add nightride component to your lualine configuration: >
-    require('lualine').setup({
-        sections = {
-            lualine_x = {
-                require('nightride').lualine_component()
-            }
-        }
-    })
+Example: Add to vim's built-in statusline: >
+    vim.o.statusline = '%f %m%=[NIGHTRIDE: %{luaeval("require(\\"nightride\\").statusline()")}] %p%% %l:%c'
 <
-
-The component will automatically show/hide based on playback state.
 
 ================================================================================
 KEYBINDINGS                                                 *nightride-keybindings*
@@ -293,30 +294,30 @@ TROUBLESHOOTING                                         *nightride-troubleshooti
 Audio Player Not Found ~
 
 Error: "No compatible audio player found"
-Solution: Install ffplay (via FFmpeg) or VLC:
-- Ubuntu/Debian: `sudo apt install ffmpeg` or `sudo apt install vlc`
-- macOS: `brew install ffmpeg` or `brew install vlc`
-- Windows: Install FFmpeg or VLC and ensure they're in your PATH
+Solution: Install mpv (recommended), ffplay (via FFmpeg), or VLC:
+- Ubuntu/Debian: `sudo apt install mpv` or `sudo apt install ffmpeg`
+- macOS: `brew install mpv` or `brew install ffmpeg`
+- Android (Termux): `pkg install mpv`
 
 Stream Not Starting ~
 
 Error: "Failed to start audio player"
 Possible causes:
 1. Internet connection issues
-2. Audio player not in PATH
+2. Verify player installation with `which mpv`, `which ffplay`, or `which vlc`
 3. Audio system busy/locked
 
 Solutions:
 1. Check internet connectivity
-2. Verify player installation with `which ffplay` or `which vlc`
+2. Verify player installation with `which mpv`, `which ffplay`, or `which vlc`
 3. Close other audio applications
-4. Try different player: set `player = 'vlc'` in configuration
+4. Try different player: set `player = 'ffplay'` in configuration
 
 Volume Control Not Working ~
 
 Issue: Volume changes don't affect playback
-Cause: Volume control restarts the stream with new volume settings
-Note: This is expected behavior for stream-based volume control
+Note: With mpv, volume is adjusted seamlessly via IPC socket.
+      With ffplay/vlc, volume changes restart the stream (brief interruption).
 
 No Status Line Updates ~
 

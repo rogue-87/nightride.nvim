@@ -181,22 +181,6 @@ function M.get_state()
   return player.get_state()
 end
 
----Get status line component (for external status line plugins)
----@return string
-function M.statusline()
-  if not initialized then
-    return ''
-  end
-  
-  return ui.get_statusline_component()
-end
-
----Get lualine component configuration
----@return table
-function M.lualine_component()
-  return ui.lualine_component()
-end
-
 ---List available stations
 ---@return nightride.Station[]
 function M.list_stations()

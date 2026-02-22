@@ -9,7 +9,8 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 - 📊 Status line integration
 - 🎛️ Interactive station selection menu
 - ⌨️ Configurable keybindings
-- 🎮 Support for ffplay and VLC media players
+- 🎮 Support for mpv (recommended), ffplay, and VLC media players
+- 🎚️ Seamless volume control via mpv IPC (no stream restart)
 - 🌊 High-quality 320kbps AAC streams
 
 ## Available Stations
@@ -25,9 +26,10 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 ## Requirements
 
 - Neovim 0.7.0 or later
-- One of the following audio players:
-  - `ffplay` (recommended, part of FFmpeg)
-  - `vlc` (VLC media player)
+- One of the following audio players (in order of preference):
+  - `mpv` (recommended - enables seamless volume control via IPC)
+  - `ffplay` (part of FFmpeg - volume changes restart stream)
+  - `vlc` (VLC media player - volume changes restart stream)
 - Internet connection for streaming
 
 ## Installation
@@ -73,7 +75,7 @@ Default configuration:
 ```lua
 require('nightride').setup({
     -- Audio player preference
-    player = 'auto',  -- 'ffplay', 'vlc', 'auto'
+    player = 'auto',  -- 'mpv', 'ffplay', 'vlc', 'auto'
     
     -- Default station
     default_station = 'nightride',
@@ -118,30 +120,6 @@ require('nightride').setup({
 - `<leader>n+` - Volume up
 - `<leader>n-` - Volume down
 
-### Status Line Integration
-
-#### Lualine
-
-Add nightride component to your lualine configuration:
-
-```lua
-require('lualine').setup({
-    sections = {
-        lualine_x = {
-            require('nightride').lualine_component()
-        }
-    }
-})
-```
-
-#### Manual Integration
-
-For custom status lines:
-
-```lua
-local nightride_status = require('nightride').statusline()
-```
-
 ## API
 
 The plugin provides a comprehensive API for integration:
@@ -180,29 +158,38 @@ This will load the plugin with lualine for status line testing.
 
 ### Audio Player Not Found
 
-Install ffplay (recommended) or VLC:
+Install mpv (recommended), ffplay, or VLC:
 
 ```bash
 # Ubuntu/Debian
+sudo apt install mpv
+# or
 sudo apt install ffmpeg
 # or
 sudo apt install vlc
 
 # macOS
+brew install mpv
+# or
 brew install ffmpeg
 # or
 brew install vlc
+
+# Android (Termux)
+pkg install mpv
 ```
 
 ### Stream Issues
 
 1. Check internet connectivity
-2. Verify audio player installation: `which ffplay` or `which vlc`
-3. Try a different player in configuration: `player = 'vlc'`
+2. Verify audio player installation: `which mpv`, `which ffplay`, or `which vlc`
+3. Try a different player in configuration: `player = 'ffplay'`
 
 ### Volume Control
 
-Volume changes restart the stream with new settings - this is expected behavior for stream-based volume control.
+When using **mpv** (recommended), volume changes are applied instantly via IPC
+without restarting the stream. With **ffplay** or **vlc**, volume changes
+restart the stream with new settings - this causes a brief audio interruption.
 
 ## Contributing
 

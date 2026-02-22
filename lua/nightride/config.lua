@@ -1,15 +1,9 @@
 ---@class nightride.Config
----@field player string Audio player preference ('ffplay', 'vlc', 'auto')
+---@field player string Audio player preference ('mpv', 'ffplay', 'vlc', 'auto')
 ---@field default_station string Default station to play
 ---@field default_volume number Default volume (0-100)
 ---@field volume_step number Volume adjustment step size
----@field statusline nightride.StatuslineConfig Status line configuration
 ---@field keymaps nightride.KeymapConfig Key mapping configuration
-
----@class nightride.StatuslineConfig
----@field enabled boolean Enable status line integration
----@field format string Status display format string
----@field position string Status line position
 
 ---@class nightride.KeymapConfig
 ---@field toggle string Key mapping for play/pause toggle
@@ -25,11 +19,6 @@ M.defaults = {
   default_station = 'nightride',
   default_volume = 50,
   volume_step = 5,
-  statusline = {
-    enabled = true,
-    format = '♪ [%s] %d%%',
-    position = 'right',
-  },
   keymaps = {
     toggle = '<leader>np',
     select = '<leader>ns',

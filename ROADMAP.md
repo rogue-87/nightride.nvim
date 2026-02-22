@@ -12,9 +12,11 @@ A Neovim plugin for streaming music from nightride.fm - the home of synthwave ra
 - **Genres**: Synthwave, retrowave, cyberpunk, darksynth, chillsynth, spacesynth, horrorsynth, EBSM/industrial
 
 ### Audio Playback Strategy
-- **Primary**: `ffplay` (lightweight, minimal UI, part of FFmpeg)
-- **Fallback**: VLC (if ffplay unavailable)
+- **Primary**: `mpv` (IPC-based runtime volume control via Unix socket)
+- **Fallback 1**: `ffplay` (lightweight, part of FFmpeg; restart-based volume)
+- **Fallback 2**: VLC (if ffplay unavailable; restart-based volume)
 - **Integration**: Background streaming via Neovim job control
+- **Detection priority**: mpv > ffplay > vlc (auto mode)
 
 ## Plugin Architecture
 
@@ -41,18 +43,20 @@ nightride.nvim/
 ### 1. Station Management
 - [x] Pre-configured list of all 7 Nightride FM stations
 - [x] Station metadata (name, genre, description)
-- [ ] Current station state tracking
+- [x] Current station state tracking
 
 ### 2. Audio Player Control
-- [ ] `ffplay` integration via Neovim jobs
-- [ ] Start/stop/restart streaming
-- [ ] Volume control (0-100%)
-- [ ] Automatic cleanup on Neovim exit
+- [x] `mpv` integration via Neovim jobs with IPC socket for runtime volume
+- [x] `ffplay` integration via Neovim jobs (restart-based volume)
+- [x] `vlc` integration via Neovim jobs (restart-based volume)
+- [x] Start/stop/restart streaming
+- [x] Volume control (0-100%) - seamless with mpv, restart with ffplay/vlc
+- [x] Automatic cleanup on Neovim exit
 
 ### 3. User Interface
-- [ ] Status line integration showing: `♪ [Station] Volume%`
-- [ ] Selection menu with `vim.ui.select()` for station choosing
-- [ ] Simple command-based interface
+- [x] Status line integration showing: `♪ [Station] Volume%`
+- [x] Selection menu with snacks.nvim picker (+ `vim.ui.select()` fallback)
+- [x] Simple command-based interface
 
 ### 4. Now Playing (Best Effort)
 - [ ] Attempt to parse stream metadata
@@ -62,25 +66,25 @@ nightride.nvim/
 ## Commands & Keybindings
 
 ### Commands
-- [ ] `:Nightride start [station]` - Start streaming (default: nightride)
-- [ ] `:Nightride stop` - Stop streaming
-- [ ] `:Nightride toggle` - Toggle playback
-- [ ] `:Nightride select` - Show station selection menu
-- [ ] `:Nightride volume [0-100]` - Set volume
-- [ ] `:Nightride status` - Show current status
+- [x] `:Nightride start [station]` - Start streaming (default: nightride)
+- [x] `:Nightride stop` - Stop streaming
+- [x] `:Nightride toggle` - Toggle playback
+- [x] `:Nightride select` - Show station selection menu
+- [x] `:Nightride volume [0-100]` - Set volume
+- [x] `:Nightride status` - Show current status
 
 ### Default Keybindings (configurable)
-- [ ] `<leader>np` - Play/pause toggle
-- [ ] `<leader>ns` - Station selection
-- [ ] `<leader>n+` - Volume up
-- [ ] `<leader>n-` - Volume down
+- [x] `<leader>np` - Play/pause toggle
+- [x] `<leader>ns` - Station selection
+- [x] `<leader>n+` - Volume up
+- [x] `<leader>n-` - Volume down
 
 ## Configuration
 
 ```lua
 require('nightride').setup({
     -- Audio player preference
-    player = 'auto', -- 'ffplay', 'vlc', 'auto'
+    player = 'auto', -- 'mpv', 'ffplay', 'vlc', 'auto'
     
     -- Default station
     default_station = 'nightride',
@@ -110,56 +114,38 @@ require('nightride').setup({
 
 ### Phase 1: Core Infrastructure
 - [x] Create project structure
-- [ ] Implement configuration system
-- [ ] Create station data module
-- [ ] Set up utility functions
+- [x] Implement configuration system
+- [x] Create station data module
+- [x] Set up utility functions
 
 ### Phase 2: Audio Engine
-- [ ] Implement player management with ffplay
-- [ ] Add volume control
-- [ ] Handle process lifecycle
-- [ ] Error handling and recovery
+- [x] Implement player management with mpv (IPC), ffplay, vlc
+- [x] Add volume control (seamless via mpv IPC, restart-based for ffplay/vlc)
+- [x] Handle process lifecycle
+- [x] Error handling and recovery
 
 ### Phase 3: User Interface
-- [ ] Status line integration
-- [ ] Station selection menu
-- [ ] Command interface
+- [x] Status line integration
+- [x] Station selection menu (snacks.nvim picker + vim.ui.select fallback)
+- [x] Command interface
 
 ### Phase 4: Integration & Polish
-- [ ] Plugin entry point
-- [ ] Command registration
-- [ ] Keybinding setup
-- [ ] Documentation
+- [x] Plugin entry point
+- [x] Command registration
+- [x] Keybinding setup
+- [x] Documentation
 
 ### Phase 5: Testing & Refinement
-- [ ] Update repro.lua for testing
+- [x] Update repro.lua for testing
 - [ ] Test all stations
 - [ ] Performance optimization
 - [ ] Bug fixes and improvements
 
-## Technical Implementation Details
-
-### Player Management
-- Use `vim.system()` for spawning ffplay processes
-- Store job handles for process management
-- Implement volume control via ffplay's `-af volume` filter
-- Handle process cleanup and error recovery
-
-### Status Line Integration
-- Hook into common status line plugins (lualine, etc.)
-- Provide function for manual integration
-- Update status when state changes
-
-### Station Selection
-- Use `vim.ui.select()` for native-feeling selection menu
-- Display station names with genre descriptions
-- Handle selection and immediate playback
-
 ## Success Criteria
 - [ ] All 7 stations stream successfully
-- [ ] Volume control works smoothly
-- [ ] Status line shows current state
-- [ ] Selection menu is intuitive
+- [x] Volume control works smoothly
+- [x] Status line shows current state
+- [x] Selection menu is intuitive
 - [ ] No memory leaks or zombie processes
 - [ ] Clean integration with Neovim workflow
 

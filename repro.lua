@@ -23,10 +23,6 @@ require("lazy.minit").repro({
 					default_station = 'nightride',
 					default_volume = 50,
 					volume_step = 10,
-					statusline = {
-						enabled = true,
-						format = '♪ [%s] %d%%',
-					},
 					keymaps = {
 						toggle = '<leader>np',
 						select = '<leader>ns',
@@ -57,7 +53,7 @@ require("lazy.minit").repro({
 				})
 			end
 		},
-		-- Add lualine for status line testing
+		-- Add lualine for status line testing (without nightride integration)
 		{
 			"nvim-lualine/lualine.nvim",
 			dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -73,7 +69,6 @@ require("lazy.minit").repro({
 						lualine_b = {'branch', 'diff', 'diagnostics'},
 						lualine_c = {'filename'},
 						lualine_x = {
-							require('nightride').lualine_component(),
 							'encoding', 
 							'fileformat', 
 							'filetype'

@@ -1,7 +1,3 @@
-local player = require('nightride.player')
-local stations = require('nightride.stations')
-local config = require('nightride.config')
-
 local M = {}
 
 ---Show station selection menu
@@ -86,72 +82,9 @@ function M.show_station_selector()
   end
 end
 
----Get status line component for external status line plugins
----@return string
-function M.get_statusline_component()
-  local config = require('nightride.config')
-  local player = require('nightride.player')
-  
-  if not config.get_option('statusline.enabled') then
-    return ''
-  end
-  
-  return player.get_status_string()
-end
-
----Setup status line integration
-function M.setup_statusline()
-  local config = require('nightride.config')
-  local opts = config.get()
-  
-  if not opts.statusline.enabled then
-    return
-  end
-  
-  -- Create autocmd to update status line when player state changes
-  vim.api.nvim_create_autocmd('User', {
-    pattern = 'NightrideStatusChanged',
-    callback = function()
-      -- Force statusline refresh
-      vim.cmd('redrawstatus')
-    end,
-    desc = 'Update status line when nightride status changes'
-  })
-  
-  -- Setup vim-airline integration if available
-  if vim.g.loaded_airline then
-    vim.g['airline#extensions#nightride#enabled'] = 1
-  end
-end
-
 ---Initialize UI components
 function M.setup()
-  M.setup_statusline()
-end
-
----Integration function for lualine
----@return table Lualine component
-function M.lualine_component()
-  return {
-    function()
-      return M.get_statusline_component()
-    end,
-    cond = function()
-      local config = require('nightride.config')
-      local player = require('nightride.player')
-      return config.get_option('statusline.enabled') and player.get_state().is_playing
-    end
-  }
-end
-
----Integration function for vim-airline
-function M.airline_component()
-  local config = require('nightride.config')
-  if not config.get_option('statusline.enabled') then
-    return ''
-  end
-  
-  return M.get_statusline_component()
+  -- UI setup complete - no statusline integration
 end
 
 ---Show current status information

@@ -16,19 +16,19 @@ M.state = {
   current_station = nil,
   volume = 50,
   job_id = nil,
-  player_cmd = nil
+  player_cmd = nil,
 }
 
 ---Initialize the player with configuration
 function M.init()
   local opts = config.get()
   M.state.volume = opts.default_volume
-  
+
   -- Detect or set player
   if opts.player == 'auto' then
     M.state.player_cmd = utils.detect_player()
     if not M.state.player_cmd then
-      vim.notify('No compatible audio player found (ffplay, vlc)', vim.log.levels.ERROR)
+      vim.notify('No compatible audio player found (mpv, ffplay, vlc)', vim.log.levels.ERROR)
       return false
     end
   else
@@ -39,7 +39,7 @@ function M.init()
       return false
     end
   end
-  
+
   return true
 end
 
@@ -49,18 +49,31 @@ function M.get_state()
   return vim.deepcopy(M.state)
 end
 
----Stop current playback
-function M.stop()
+---Clean up a stale mpv IPC socket file if it exists
+local function cleanup_socket()
+  local socket_path = utils.get_ipc_socket_path()
+  os.remove(socket_path)
+end
+
+---Kill the running player process without resetting playback state.
+---Used internally when restarting the stream (e.g. station change on fallback players).
+local function kill_job()
   if M.state.job_id then
     vim.fn.jobstop(M.state.job_id)
     M.state.job_id = nil
   end
-  
+  -- Clean up socket so mpv can create a fresh one on next start
+  if M.state.player_cmd == 'mpv' then
+    cleanup_socket()
+  end
+end
+
+---Stop current playback
+function M.stop()
+  kill_job()
+
   M.state.is_playing = false
   M.state.current_station = nil
-  
-  -- Trigger status update
-  vim.api.nvim_exec_autocmds('User', { pattern = 'NightrideStatusChanged' })
 end
 
 ---Start playback for a station
@@ -68,57 +81,60 @@ end
 ---@param url string Stream URL
 ---@return boolean Success
 function M.start(station_id, url)
-  -- Stop current playback if running
-  if M.state.is_playing then
-    M.stop()
-  end
-  
+  -- Kill current process if running (without resetting state)
+  kill_job()
+
   if not M.state.player_cmd then
     vim.notify('No audio player available', vim.log.levels.ERROR)
     return false
   end
-  
+
   local args = utils.get_player_args(M.state.player_cmd, url, M.state.volume)
   if not args then
     vim.notify(string.format('Unsupported player: %s', M.state.player_cmd), vim.log.levels.ERROR)
     return false
   end
-  
+
   -- Start the audio stream
-  M.state.job_id = vim.fn.jobstart(args, {
-    on_exit = function(job_id, exit_code, event_type)
-      if M.state.job_id == job_id then
-        M.state.is_playing = false
-        M.state.job_id = nil
-        
-        if exit_code ~= 0 and exit_code ~= 130 then -- 130 is normal SIGINT
+  local job_id = vim.fn.jobstart(args, {
+    on_exit = function(id, exit_code, _)
+      -- Only handle if this is still the active job
+      if M.state.job_id ~= id then
+        return
+      end
+
+      M.state.is_playing = false
+      M.state.current_station = nil
+      M.state.job_id = nil
+
+      if exit_code ~= 0 and exit_code ~= 130 and exit_code ~= 143 then
+        vim.schedule(function()
           vim.notify(string.format('Stream ended unexpectedly (code: %d)', exit_code), vim.log.levels.WARN)
-        end
-        
-        -- Trigger status update
-        vim.api.nvim_exec_autocmds('User', { pattern = 'NightrideStatusChanged' })
+        end)
+      end
+
+      -- Clean up socket on exit
+      if M.state.player_cmd == 'mpv' then
+        cleanup_socket()
       end
     end,
-    
+
     -- Note: on_stderr callback removed to prevent UI lag from mpv's verbose stderr output
   })
-  
-  if M.state.job_id <= 0 then
+
+  if job_id <= 0 then
     vim.notify('Failed to start audio player', vim.log.levels.ERROR)
-    M.state.job_id = nil
     return false
   end
-  
+
+  M.state.job_id = job_id
   M.state.is_playing = true
   M.state.current_station = station_id
-  
-  -- Trigger status update
-  vim.api.nvim_exec_autocmds('User', { pattern = 'NightrideStatusChanged' })
-  
+
   return true
 end
 
----Toggle playbook (start default station if not playing)
+---Toggle playback (start default station if not playing)
 ---@param default_station string Default station to start if not playing
 ---@param station_url string URL for default station
 ---@return boolean Success
@@ -131,6 +147,38 @@ function M.toggle(default_station, station_url)
   end
 end
 
+---Set volume via mpv IPC (seamless, no stream restart)
+---@param new_volume number New volume (0-100)
+---@return boolean Success (always true; IPC is fire-and-forget)
+local function set_volume_ipc(new_volume)
+  local socket_path = utils.get_ipc_socket_path()
+  utils.send_mpv_command(socket_path, { 'set_property', 'volume', new_volume }, function(err, _)
+    if err then
+      vim.notify(string.format('mpv IPC volume error: %s', tostring(err)), vim.log.levels.DEBUG)
+    end
+  end)
+  return true
+end
+
+---Set volume via stream restart (ffplay/vlc fallback)
+---@param new_volume number New volume (0-100)
+---@param old_volume number Previous volume to restore on failure
+---@return boolean Success
+local function set_volume_restart(new_volume, old_volume)
+  local stations = require('nightride.stations')
+  local station = stations.get_by_id(M.state.current_station)
+
+  if station then
+    local success = M.start(M.state.current_station, station.url)
+    if not success then
+      M.state.volume = old_volume
+      return false
+    end
+  end
+
+  return true
+end
+
 ---Set volume
 ---@param new_volume number New volume (0-100)
 ---@return boolean Success
@@ -138,26 +186,20 @@ function M.set_volume(new_volume)
   local clamped_volume = utils.clamp(new_volume, 0, 100)
   local old_volume = M.state.volume
   M.state.volume = clamped_volume
-  
-  -- If currently playing, restart with new volume
+
   if M.state.is_playing and M.state.current_station then
-    local stations = require('nightride.stations')
-    local station = stations.get_by_id(M.state.current_station)
-    
-    if station then
-      -- Restart playback with new volume
-      local success = M.start(M.state.current_station, station.url)
+    if utils.supports_ipc(M.state.player_cmd) then
+      -- mpv: seamless volume change via IPC socket
+      set_volume_ipc(clamped_volume)
+    else
+      -- ffplay/vlc: must restart stream with new volume args
+      local success = set_volume_restart(clamped_volume, old_volume)
       if not success then
-        -- Restore old volume on failure
-        M.state.volume = old_volume
         return false
       end
     end
-  else
-    -- Just update volume state
-    vim.api.nvim_exec_autocmds('User', { pattern = 'NightrideStatusChanged' })
   end
-  
+
   return true
 end
 
@@ -166,22 +208,6 @@ end
 ---@return boolean Success
 function M.adjust_volume(delta)
   return M.set_volume(M.state.volume + delta)
-end
-
----Get formatted status string
----@return string
-function M.get_status_string()
-  local opts = config.get()
-  
-  if not M.state.is_playing then
-    return ''
-  end
-  
-  local stations = require('nightride.stations')
-  local station = stations.get_by_id(M.state.current_station)
-  local station_name = station and station.name or 'Unknown'
-  
-  return utils.format_status(opts.statusline.format, station_name, M.state.volume)
 end
 
 ---Cleanup on plugin unload
@@ -196,7 +222,7 @@ vim.api.nvim_create_autocmd('VimLeavePre', {
   callback = function()
     M.cleanup()
   end,
-  desc = 'Cleanup nightride audio on Neovim exit'
+  desc = 'Cleanup nightride audio on Neovim exit',
 })
 
 return M

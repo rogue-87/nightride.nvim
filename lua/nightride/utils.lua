@@ -23,17 +23,97 @@ function M.command_exists(cmd)
 end
 
 ---Detect available audio player
+---Priority: mpv (IPC volume control) > ffplay > vlc (restart-based volume)
 ---@return string|nil Available player command or nil
 function M.detect_player()
-  local players = { 'ffplay', 'vlc' }
-  
+  local players = { 'mpv', 'ffplay', 'vlc' }
+
   for _, player in ipairs(players) do
     if M.command_exists(player) then
       return player
     end
   end
-  
+
   return nil
+end
+
+---Check if a player supports IPC-based runtime volume control
+---@param player string Player command name
+---@return boolean
+function M.supports_ipc(player)
+  return player == 'mpv'
+end
+
+---Get the IPC socket path for mpv
+---Cross-platform: Termux uses $PREFIX/tmp, others use /tmp
+---@return string
+function M.get_ipc_socket_path()
+  local prefix = os.getenv('PREFIX')
+  if prefix then
+    -- Termux (Android): $PREFIX/tmp/
+    return prefix .. '/tmp/nightride-mpv.sock'
+  end
+  return '/tmp/nightride-mpv.sock'
+end
+
+---Send a JSON-RPC command to mpv via its IPC socket
+---Uses luv (vim.uv / vim.loop) for async pipe communication
+---@param socket_path string Path to the mpv IPC socket
+---@param command table The command array, e.g. {"set_property", "volume", 75}
+---@param callback function|nil Optional callback(err, response)
+function M.send_mpv_command(socket_path, command, callback)
+  local uv = vim.uv or vim.loop
+  local pipe = uv.new_pipe(false)
+
+  if not pipe then
+    if callback then callback('Failed to create pipe', nil) end
+    return
+  end
+
+  pipe:connect(socket_path, function(err)
+    if err then
+      pipe:close()
+      if callback then
+        vim.schedule(function() callback(err, nil) end)
+      end
+      return
+    end
+
+    local payload = vim.json.encode({ command = command }) .. '\n'
+
+    pipe:write(payload, function(write_err)
+      if write_err then
+        pipe:close()
+        if callback then
+          vim.schedule(function() callback(write_err, nil) end)
+        end
+        return
+      end
+
+      if callback then
+        -- Read one response
+        pipe:read_start(function(read_err, data)
+          pipe:read_stop()
+          pipe:close()
+          vim.schedule(function()
+            if read_err then
+              callback(read_err, nil)
+            elseif data then
+              local ok, decoded = pcall(vim.json.decode, data)
+              callback(nil, ok and decoded or data)
+            else
+              callback(nil, nil)
+            end
+          end)
+        end)
+      else
+        -- Fire-and-forget: close after a small delay to let the write flush
+        pipe:shutdown(function()
+          pipe:close()
+        end)
+      end
+    end)
+  end)
 end
 
 ---Clamp a value between min and max
@@ -47,7 +127,7 @@ end
 
 ---Convert volume (0-100) to player-specific format
 ---@param volume number Volume percentage (0-100)
----@param player string Player type ('ffplay' or 'vlc')
+---@param player string Player type ('mpv', 'ffplay', or 'vlc')
 ---@return string
 function M.volume_to_player_format(volume, player)
   local clamped = M.clamp(volume, 0, 100)
@@ -58,9 +138,27 @@ function M.volume_to_player_format(volume, player)
   elseif player == 'vlc' then
     -- VLC uses percentage directly
     return tostring(clamped)
+  elseif player == 'mpv' then
+    -- mpv uses 0-100 directly
+    return tostring(clamped)
   end
   
   return tostring(clamped)
+end
+
+---Create mpv command arguments (with IPC socket for runtime control)
+---@param url string Stream URL
+---@param volume number Volume (0-100)
+---@return string[]
+function M.create_mpv_args(url, volume)
+  return {
+    'mpv',
+    '--no-video',
+    '--quiet',
+    '--volume=' .. M.volume_to_player_format(volume, 'mpv'),
+    '--input-ipc-server=' .. M.get_ipc_socket_path(),
+    url,
+  }
 end
 
 ---Create ffplay command arguments
@@ -99,22 +197,15 @@ end
 ---@param volume number Volume (0-100)
 ---@return string[]|nil
 function M.get_player_args(player, url, volume)
-  if player == 'ffplay' then
+  if player == 'mpv' then
+    return M.create_mpv_args(url, volume)
+  elseif player == 'ffplay' then
     return M.create_ffplay_args(url, volume)
   elseif player == 'vlc' then
     return M.create_vlc_args(url, volume)
   end
   
   return nil
-end
-
----Format status line text
----@param format string Format string with %s and %d placeholders
----@param station_name string Current station name
----@param volume number Current volume
----@return string
-function M.format_status(format, station_name, volume)
-  return string.format(format, station_name, volume)
 end
 
 ---Debounce a function call
