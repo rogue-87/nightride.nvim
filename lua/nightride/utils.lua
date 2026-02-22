@@ -4,15 +4,22 @@ local M = {}
 ---@param cmd string Command name to check
 ---@return boolean
 function M.command_exists(cmd)
-  local handle = io.popen('which ' .. cmd .. ' 2>/dev/null')
-  if not handle then
-    return false
+  -- Use vim.system for non-blocking execution (nvim 0.10+)
+  if vim.system then
+    local result = vim.system({'which', cmd}, {text = true}):wait(1000)
+    return result.code == 0
+  else
+    -- Fallback for older nvim versions - this blocks but should only run once at init
+    local handle = io.popen('which ' .. cmd .. ' 2>/dev/null')
+    if not handle then
+      return false
+    end
+    
+    local result = handle:read('*a')
+    handle:close()
+    
+    return result ~= ''
   end
-  
-  local result = handle:read('*a')
-  handle:close()
-  
-  return result ~= ''
 end
 
 ---Detect available audio player

@@ -100,18 +100,7 @@ function M.start(station_id, url)
       end
     end,
     
-    on_stderr = function(job_id, data, event_type)
-      -- Log errors but don't spam the user
-      if data and #data > 0 then
-        vim.schedule(function()
-          for _, line in ipairs(data) do
-            if line ~= '' then
-              vim.notify(string.format('Player error: %s', line), vim.log.levels.DEBUG)
-            end
-          end
-        end)
-      end
-    end
+    -- Note: on_stderr callback removed to prevent UI lag from mpv's verbose stderr output
   })
   
   if M.state.job_id <= 0 then
