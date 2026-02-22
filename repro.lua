@@ -17,26 +17,34 @@ require("lazy.minit").repro({
 			dir = vim.fn.getcwd(),
 			dev = true,
 			config = function()
-				require('nightride').setup({
+				require("nightride").setup({
 					-- Test configuration
-					player = 'auto',
-					default_station = 'nightride',
+					player = "auto",
+					default_station = "nightride",
 					default_volume = 50,
 					volume_step = 10,
 					keymaps = {
-						toggle = '<leader>np',
-						volume_up = '<leader>n+',
-						volume_down = '<leader>n-',
-					}
+						toggle = "<leader>np",
+						volume_up = "<leader>n+",
+						volume_down = "<leader>n-",
+					},
 				})
-				
+
 				-- Show some helpful info
-				vim.notify('nightride.nvim loaded! Try :Nightride start <station> to get started', vim.log.levels.INFO)
+				vim.notify("nightride.nvim loaded! Try :Nightride start <station> to get started", vim.log.levels.INFO)
 			end,
 			keys = {
 				{ "<leader>np", "<cmd>Nightride toggle<cr>", desc = "Nightride: Toggle" },
-				{ "<leader>n+", "<cmd>Nightride volume " .. (vim.g.nightride_volume or 50) + 10 .. "<cr>", desc = "Nightride: Volume Up" },
-				{ "<leader>n-", "<cmd>Nightride volume " .. math.max(0, (vim.g.nightride_volume or 50) - 10) .. "<cr>", desc = "Nightride: Volume Down" },
+				{
+					"<leader>n+",
+					"<cmd>Nightride volume " .. (vim.g.nightride_volume or 50) + 10 .. "<cr>",
+					desc = "Nightride: Volume Up",
+				},
+				{
+					"<leader>n-",
+					"<cmd>Nightride volume " .. math.max(0, (vim.g.nightride_volume or 50) - 10) .. "<cr>",
+					desc = "Nightride: Volume Down",
+				},
 			},
 		},
 		-- Add snacks.nvim for enhanced picker UI
@@ -49,33 +57,33 @@ require("lazy.minit").repro({
 					picker = { enabled = true },
 					notifier = { enabled = true },
 				})
-			end
+			end,
 		},
 		-- Add lualine for status line testing (without nightride integration)
 		{
 			"nvim-lualine/lualine.nvim",
 			dependencies = { "nvim-tree/nvim-web-devicons" },
 			config = function()
-				require('lualine').setup({
+				require("lualine").setup({
 					options = {
-						theme = 'auto',
-						component_separators = { left = '', right = ''},
-						section_separators = { left = '', right = ''},
+						theme = "auto",
+						component_separators = { left = "", right = "" },
+						section_separators = { left = "", right = "" },
 					},
 					sections = {
-						lualine_a = {'mode'},
-						lualine_b = {'branch', 'diff', 'diagnostics'},
-						lualine_c = {'filename'},
+						lualine_a = { "mode" },
+						lualine_b = { "branch", "diff", "diagnostics" },
+						lualine_c = { "filename" },
 						lualine_x = {
-							'encoding', 
-							'fileformat', 
-							'filetype'
+							"encoding",
+							"fileformat",
+							"filetype",
 						},
-						lualine_y = {'progress'},
-						lualine_z = {'location'}
+						lualine_y = { "progress" },
+						lualine_z = { "location" },
 					},
 				})
-			end
-		}
+			end,
+		},
 	},
 })
