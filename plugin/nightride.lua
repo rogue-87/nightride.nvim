@@ -18,7 +18,7 @@ end, {
     
     if num_args == 1 then
       -- Complete first argument (subcommands)
-      local commands = { 'start', 'stop', 'toggle', 'select', 'volume', 'status' }
+      local commands = { 'start', 'stop', 'toggle', 'volume', 'status' }
       return vim.tbl_filter(function(cmd)
         return cmd:match('^' .. arg_lead)
       end, commands)

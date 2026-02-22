@@ -104,16 +104,6 @@ function M.toggle()
   end
 end
 
----Show station selection menu
-function M.select()
-  if not initialized then
-    vim.notify('Nightride not initialized. Call setup() first.', vim.log.levels.ERROR)
-    return
-  end
-  
-  ui.show_station_selector()
-end
-
 ---Set volume
 ---@param volume number Volume (0-100)
 ---@return boolean Success
@@ -212,9 +202,6 @@ function M._command_handler(opts)
   elseif cmd == 'toggle' then
     M.toggle()
     
-  elseif cmd == 'select' then
-    M.select()
-    
   elseif cmd == 'volume' then
     local vol = tonumber(args[2])
     if not vol then
@@ -232,7 +219,7 @@ function M._command_handler(opts)
     
   else
     vim.notify(string.format('Unknown command: %s', cmd), vim.log.levels.ERROR)
-    vim.notify('Available commands: start, stop, toggle, select, volume, status', vim.log.levels.INFO)
+    vim.notify('Available commands: start, stop, toggle, volume, status', vim.log.levels.INFO)
   end
 end
 

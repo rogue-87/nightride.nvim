@@ -27,7 +27,6 @@ Features:
 - Stream from 7 different nightride.fm stations
 - Seamless volume control via mpv IPC (no stream restart)
 - Status line integration 
-- Station selection menu
 - Configurable keybindings
 - Support for mpv (recommended), ffplay, and VLC media players
 
@@ -52,7 +51,6 @@ Using lazy.nvim: >
         volume_step = 10,
         keymaps = {
             toggle = '<leader>nt',
-            select = '<leader>ns',
             volume_up = '<leader>n+',
             volume_down = '<leader>n-'
         }
@@ -99,7 +97,6 @@ Default configuration: >
         -- Key mappings
         keymaps = {
             toggle = '<leader>np',
-            select = '<leader>ns',
             volume_up = '<leader>n+',
             volume_down = '<leader>n-',
         }
@@ -131,7 +128,6 @@ Configuration Options:
 
 *nightride-config-keymaps*
     keymaps.toggle (string): Keymap for play/pause toggle
-    keymaps.select (string): Keymap for station selection menu
     keymaps.volume_up (string): Keymap for volume up
     keymaps.volume_down (string): Keymap for volume down
 
@@ -150,9 +146,6 @@ COMMANDS                                                     *nightride-commands
 
 :Nightride toggle                                           *:Nightride-toggle*
     Toggle playback (start default station if not playing)
-
-:Nightride select                                           *:Nightride-select*
-    Show station selection menu
 
 :Nightride volume {0-100}                                   *:Nightride-volume*
     Set volume to specific level
@@ -186,9 +179,6 @@ require('nightride').toggle()                               *nightride.toggle()*
     
     Returns: ~
         (boolean) Success status
-
-require('nightride').select()                               *nightride.select()*
-    Show station selection menu
 
 require('nightride').volume({vol})                          *nightride.volume()*
     Set volume
@@ -264,7 +254,6 @@ KEYBINDINGS                                                 *nightride-keybindin
 Default keybindings can be customized in setup configuration:
 
 <leader>np    Toggle playbook (play/pause)
-<leader>ns    Show station selection menu  
 <leader>n+    Increase volume
 <leader>n-    Decrease volume
 
@@ -272,7 +261,6 @@ To disable default keybindings: >
     require('nightride').setup({
         keymaps = {
             toggle = '',
-            select = '',
             volume_up = '',
             volume_down = '',
         }
@@ -284,8 +272,6 @@ Manual Keybinding Setup ~
 You can set up custom keybindings manually: >
     vim.keymap.set('n', '<F9>', require('nightride').toggle, 
         { desc = 'Toggle Nightride' })
-    vim.keymap.set('n', '<F10>', require('nightride').select,
-        { desc = 'Select Nightride Station' })
 <
 
 ================================================================================

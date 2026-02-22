@@ -25,18 +25,16 @@ require("lazy.minit").repro({
 					volume_step = 10,
 					keymaps = {
 						toggle = '<leader>np',
-						select = '<leader>ns',
 						volume_up = '<leader>n+',
 						volume_down = '<leader>n-',
 					}
 				})
 				
 				-- Show some helpful info
-				vim.notify('nightride.nvim loaded! Try :Nightride select to get started', vim.log.levels.INFO)
+				vim.notify('nightride.nvim loaded! Try :Nightride start <station> to get started', vim.log.levels.INFO)
 			end,
 			keys = {
 				{ "<leader>np", "<cmd>Nightride toggle<cr>", desc = "Nightride: Toggle" },
-				{ "<leader>ns", "<cmd>Nightride select<cr>", desc = "Nightride: Select Station" },
 				{ "<leader>n+", "<cmd>Nightride volume " .. (vim.g.nightride_volume or 50) + 10 .. "<cr>", desc = "Nightride: Volume Up" },
 				{ "<leader>n-", "<cmd>Nightride volume " .. math.max(0, (vim.g.nightride_volume or 50) - 10) .. "<cr>", desc = "Nightride: Volume Down" },
 			},

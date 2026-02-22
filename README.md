@@ -7,7 +7,6 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 - 🎵 Stream from 7 different nightride.fm stations
 - 🔊 Volume control from within Neovim
 - 📊 Status line integration
-- 🎛️ Interactive station selection menu
 - ⌨️ Configurable keybindings
 - 🎮 Support for mpv (recommended), ffplay, and VLC media players
 - 🎚️ Seamless volume control via mpv IPC (no stream restart)
@@ -94,7 +93,6 @@ require('nightride').setup({
     -- Key mappings
     keymaps = {
         toggle = '<leader>np',
-        select = '<leader>ns',
         volume_up = '<leader>n+',
         volume_down = '<leader>n-',
     }
@@ -109,14 +107,12 @@ require('nightride').setup({
 - `:Nightride start [station]` - Start streaming (optional station)
 - `:Nightride stop` - Stop streaming
 - `:Nightride toggle` - Toggle playback
-- `:Nightride select` - Show station selection menu
 - `:Nightride volume <0-100>` - Set volume
 - `:Nightride status` - Show detailed status
 
 ### Default Keybindings
 
 - `<leader>np` - Toggle playback
-- `<leader>ns` - Station selection menu
 - `<leader>n+` - Volume up
 - `<leader>n-` - Volume down
 
@@ -131,7 +127,6 @@ local nightride = require('nightride')
 nightride.start('nightride')  -- Start specific station
 nightride.stop()              -- Stop playback
 nightride.toggle()            -- Toggle playback
-nightride.select()            -- Show station selector
 
 -- Volume control
 nightride.volume(75)          -- Set volume to 75%

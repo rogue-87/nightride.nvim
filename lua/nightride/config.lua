@@ -7,7 +7,6 @@
 
 ---@class nightride.KeymapConfig
 ---@field toggle string Key mapping for play/pause toggle
----@field select string Key mapping for station selection
 ---@field volume_up string Key mapping for volume up
 ---@field volume_down string Key mapping for volume down
 
@@ -21,7 +20,6 @@ M.defaults = {
   volume_step = 5,
   keymaps = {
     toggle = '<leader>np',
-    select = '<leader>ns',
     volume_up = '<leader>n+',
     volume_down = '<leader>n-',
   }
