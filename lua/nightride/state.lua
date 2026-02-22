@@ -1,11 +1,12 @@
 -- Minimal state persistence for nightride.nvim
 -- Transparently saves/loads volume and last station between sessions
+-- State is stored at: stdpath('state')/nightride/state.json
 
 local M = {}
 
--- Use standard Neovim data directory
-local data_dir = vim.fn.stdpath('data') .. '/nightride'
-local state_file = data_dir .. '/state.json'
+-- Use standard Neovim state directory
+local state_dir = vim.fn.stdpath('state') .. '/nightride'
+local state_file = state_dir .. '/state.json'
 
 -- Minimal persistent state structure
 local default_state = {
@@ -67,8 +68,8 @@ end
 ---@param state table State to save
 ---@return boolean success Whether save was successful
 function M.save(state)
-  -- Ensure data directory exists
-  vim.fn.mkdir(data_dir, 'p')
+  -- Ensure state directory exists
+  vim.fn.mkdir(state_dir, 'p')
   
   -- Load existing state (but avoid recursion by direct file read)
   local current_state = copy_table(default_state)
