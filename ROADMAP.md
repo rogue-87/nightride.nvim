@@ -25,6 +25,7 @@ A Neovim plugin for streaming music from nightride.fm - the home of synthwave ra
 - **Removed `:Nightride select` command**: Replaced interactive station selection with tab completion for `:Nightride start <station>`
 - **Streamlined configuration**: Reduced configuration options to focus on core streaming functionality
 - **Fixed stability issues**: Resolved lualine loading order problems and blocking operation freezes
+- **Added persistence**: Implemented minimal state persistence for volume and last played station between sessions
 
 ## Plugin Architecture
 
@@ -37,6 +38,7 @@ nightride.nvim/
 │       ├── config.lua        # Configuration and defaults
 │       ├── player.lua        # Audio player management
 │       ├── stations.lua      # Station data and management
+│       ├── state.lua         # Persistence (volume/station)
 │       ├── ui.lua           # UI utilities
 │       └── utils.lua        # Utility functions
 ├── plugin/
@@ -52,6 +54,7 @@ nightride.nvim/
 - [x] Pre-configured list of all 7 Nightride FM stations
 - [x] Station metadata (name, genre, description)
 - [x] Current station state tracking
+- [x] Last played station persistence
 
 ### 2. Audio Player Control
 - [x] `mpv` integration via Neovim jobs with IPC socket for runtime volume
@@ -59,6 +62,7 @@ nightride.nvim/
 - [x] `vlc` integration via Neovim jobs (restart-based volume)
 - [x] Start/stop/restart streaming
 - [x] Volume control (0-100%) - seamless with mpv, restart with ffplay/vlc
+- [x] Volume persistence across sessions
 - [x] Automatic cleanup on Neovim exit
 
 ### 3. User Interface
@@ -77,7 +81,7 @@ nightride.nvim/
 ### Commands
 - [x] `:Nightride start [station]` - Start streaming (with tab completion)
 - [x] `:Nightride stop` - Stop streaming
-- [x] `:Nightride toggle` - Toggle playback
+- [x] `:Nightride toggle` - Toggle playback (uses last played station)
 - ~~`:Nightride select`~~ - ~~Show station selection menu~~ (removed)
 - [x] `:Nightride volume [0-100]` - Set volume
 - [x] `:Nightride status` - Show current status
@@ -136,6 +140,7 @@ require('nightride').setup({
 - [x] Command registration
 - [x] Keybinding setup
 - [x] Documentation
+- [x] Session persistence for volume and station
 
 ### Phase 5: Testing & Refinement
 - [x] Update repro.lua for testing

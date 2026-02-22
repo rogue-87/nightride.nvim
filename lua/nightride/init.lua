@@ -2,6 +2,7 @@ local config = require("nightride.config")
 local player = require("nightride.player")
 local stations = require("nightride.stations")
 local ui = require("nightride.ui")
+local state = require("nightride.state")
 
 local M = {}
 
@@ -75,7 +76,12 @@ function M.start(station_id)
 		return false
 	end
 
-	return player.start(station.id, station.url)
+	local success = player.start(station.id, station.url)
+	if success then
+		-- Save the station to state for next session
+		state.save({ last_station = station.id })
+	end
+	return success
 end
 
 ---Stop streaming
@@ -88,7 +94,7 @@ function M.stop()
 	player.stop()
 end
 
----Toggle playback (start default station if not playing)
+---Toggle playback (start last played or default station if not playing)
 ---@return boolean Success
 function M.toggle()
 	if not initialized then
@@ -96,14 +102,16 @@ function M.toggle()
 		return false
 	end
 
-	local state = player.get_state()
+	local player_state = player.get_state()
 
-	if state.is_playing then
+	if player_state.is_playing then
 		M.stop()
 		return true
 	else
 		local opts = config.get()
-		return M.start(opts.default_station)
+		local saved_state = state.load()
+		local station_id = saved_state.last_station or opts.default_station
+		return M.start(station_id)
 	end
 end
 

@@ -1,5 +1,6 @@
 local utils = require("nightride.utils")
 local config = require("nightride.config")
+local state = require("nightride.state")
 
 ---@class nightride.PlayerState
 ---@field is_playing boolean Whether audio is currently playing
@@ -9,6 +10,9 @@ local config = require("nightride.config")
 ---@field player_cmd string|nil Current player command
 
 local M = {}
+
+-- Debounce timer for state saving
+local save_timer = nil
 
 ---@type nightride.PlayerState
 M.state = {
@@ -22,7 +26,10 @@ M.state = {
 ---Initialize the player with configuration
 function M.init()
 	local opts = config.get()
-	M.state.volume = opts.default_volume
+	
+	-- Load saved state and use saved volume if available
+	local saved_state = state.load()
+	M.state.volume = saved_state.last_volume or opts.default_volume
 
 	-- Detect or set player
 	if opts.player == "auto" then
@@ -196,9 +203,23 @@ function M.set_volume(new_volume)
 			local success = set_volume_restart(clamped_volume, old_volume)
 			if not success then
 				return false
-			end
 		end
 	end
+
+	-- Save volume change (debounced to avoid excessive I/O)
+	if save_timer then
+		save_timer:stop()
+	end
+	save_timer = vim.defer_fn(function()
+		local current_state = {
+			last_volume = M.state.volume,
+			last_station = M.state.current_station
+		}
+		state.save(current_state)
+	end, 1000) -- 1 second debounce
+
+	return true
+end
 
 	return true
 end
@@ -210,8 +231,25 @@ function M.adjust_volume(delta)
 	return M.set_volume(M.state.volume + delta)
 end
 
+---Save state immediately (used for station changes and cleanup)
+local function save_state_now()
+	local current_state = {
+		last_volume = M.state.volume,
+		last_station = M.state.current_station
+	}
+	state.save(current_state)
+end
+
 ---Cleanup on plugin unload
 function M.cleanup()
+	-- Cancel any pending debounced save
+	if save_timer then
+		save_timer:stop()
+	end
+	
+	-- Save state immediately before cleanup
+	save_state_now()
+	
 	if M.state.is_playing then
 		M.stop()
 	end
