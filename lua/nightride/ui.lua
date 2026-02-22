@@ -6,6 +6,8 @@ local M = {}
 
 ---Show station selection menu
 function M.show_station_selector()
+  local stations = require('nightride.stations')
+  local player = require('nightride.player')
   local station_list = stations.get_all()
   
   -- Check if snacks.nvim picker is available
@@ -87,9 +89,10 @@ end
 ---Get status line component for external status line plugins
 ---@return string
 function M.get_statusline_component()
-  local opts = config.get()
+  local config = require('nightride.config')
+  local player = require('nightride.player')
   
-  if not opts.statusline.enabled then
+  if not config.get_option('statusline.enabled') then
     return ''
   end
   
@@ -98,6 +101,7 @@ end
 
 ---Setup status line integration
 function M.setup_statusline()
+  local config = require('nightride.config')
   local opts = config.get()
   
   if not opts.statusline.enabled then
@@ -133,6 +137,8 @@ function M.lualine_component()
       return M.get_statusline_component()
     end,
     cond = function()
+      local config = require('nightride.config')
+      local player = require('nightride.player')
       return config.get_option('statusline.enabled') and player.get_state().is_playing
     end
   }
@@ -140,6 +146,7 @@ end
 
 ---Integration function for vim-airline
 function M.airline_component()
+  local config = require('nightride.config')
   if not config.get_option('statusline.enabled') then
     return ''
   end
@@ -149,6 +156,8 @@ end
 
 ---Show current status information
 function M.show_status()
+  local player = require('nightride.player')
+  local stations = require('nightride.stations')
   local state = player.get_state()
   
   if not state.is_playing then
