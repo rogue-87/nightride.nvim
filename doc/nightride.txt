@@ -1,0 +1,338 @@
+*nightride.txt*    Stream music from nightride.fm in Neovim
+
+Author: nightride.nvim contributors
+License: MIT
+
+================================================================================
+CONTENTS                                                     *nightride-contents*
+
+    1. Introduction ................................. |nightride-introduction|
+    2. Requirements ................................. |nightride-requirements|
+    3. Installation ................................. |nightride-installation|
+    4. Configuration ................................ |nightride-configuration|
+    5. Commands ..................................... |nightride-commands|
+    6. API Functions ................................ |nightride-api|
+    7. Status Line Integration ...................... |nightride-statusline|
+    8. Keybindings .................................. |nightride-keybindings|
+    9. Troubleshooting .............................. |nightride-troubleshooting|
+
+================================================================================
+INTRODUCTION                                             *nightride-introduction*
+
+nightride.nvim is a Neovim plugin that streams music from nightride.fm, the
+home of synthwave radio. It provides seamless integration with your Neovim
+workflow, allowing you to listen to high-quality electronic music while coding.
+
+Features:
+- Stream from 7 different nightride.fm stations
+- Volume control from within Neovim
+- Status line integration 
+- Station selection menu
+- Configurable keybindings
+- Support for ffplay and VLC media players
+
+================================================================================
+REQUIREMENTS                                             *nightride-requirements*
+
+- Neovim 0.7.0 or later
+- One of the following audio players:
+  - ffplay (recommended, part of FFmpeg)
+  - VLC media player
+- Internet connection for streaming
+
+================================================================================
+INSTALLATION                                             *nightride-installation*
+
+Using lazy.nvim: >
+    {
+        'rogue-87/nightride.nvim',
+        config = function()
+            require('nightride').setup()
+        end
+    }
+<
+
+Using packer.nvim: >
+    use {
+        'rogue-87/nightride.nvim',
+        config = function()
+            require('nightride').setup()
+        end
+    }
+<
+
+Using vim-plug: >
+    Plug 'rogue-87/nightride.nvim'
+<
+Then add to your init.lua: >
+    require('nightride').setup()
+<
+
+================================================================================
+CONFIGURATION                                           *nightride-configuration*
+
+Default configuration: >
+    require('nightride').setup({
+        -- Audio player preference
+        player = 'auto',  -- 'ffplay', 'vlc', 'auto'
+        
+        -- Default station
+        default_station = 'nightride',
+        
+        -- Volume settings
+        default_volume = 50,
+        volume_step = 5,
+        
+        -- Status line integration
+        statusline = {
+            enabled = true,
+            format = '♪ [%s] %d%%',  -- station, volume
+            position = 'right',
+        },
+        
+        -- Key mappings
+        keymaps = {
+            toggle = '<leader>np',
+            select = '<leader>ns',
+            volume_up = '<leader>n+',
+            volume_down = '<leader>n-',
+        }
+    })
+<
+
+Configuration Options:
+
+*nightride-config-player*
+    player (string): Audio player to use
+    - 'auto': Automatically detect available player (ffplay > vlc)
+    - 'ffplay': Use ffplay (recommended)
+    - 'vlc': Use VLC media player
+
+*nightride-config-default-station*
+    default_station (string): Station to play when toggling from stopped state
+    Available stations: nightride, chillsynth, datawave, spacesynth, 
+    darksynth, horrorsynth, ebsm
+
+*nightride-config-volume*
+    default_volume (number): Initial volume (0-100)
+    volume_step (number): Amount to adjust volume with up/down commands
+
+*nightride-config-statusline*
+    statusline.enabled (boolean): Enable status line integration
+    statusline.format (string): Format string (%s=station, %d=volume)
+    statusline.position (string): Position hint for status line plugins
+
+*nightride-config-keymaps*
+    keymaps.toggle (string): Keymap for play/pause toggle
+    keymaps.select (string): Keymap for station selection menu
+    keymaps.volume_up (string): Keymap for volume up
+    keymaps.volume_down (string): Keymap for volume down
+
+================================================================================
+COMMANDS                                                     *nightride-commands*
+
+:Nightride                                                           *:Nightride*
+    Show current status
+
+:Nightride start [station]                                   *:Nightride-start*
+    Start streaming. Optional station parameter (defaults to configured 
+    default_station)
+
+:Nightride stop                                               *:Nightride-stop*
+    Stop streaming
+
+:Nightride toggle                                           *:Nightride-toggle*
+    Toggle playback (start default station if not playing)
+
+:Nightride select                                           *:Nightride-select*
+    Show station selection menu
+
+:Nightride volume {0-100}                                   *:Nightride-volume*
+    Set volume to specific level
+
+:Nightride status                                           *:Nightride-status*
+    Show detailed status information
+
+================================================================================
+API FUNCTIONS                                                     *nightride-api*
+
+require('nightride').setup({opts})                          *nightride.setup()*
+    Initialize the plugin with configuration options
+    
+    Parameters: ~
+        {opts} (table|nil) Configuration options
+
+require('nightride').start({station})                        *nightride.start()*
+    Start streaming a station
+    
+    Parameters: ~
+        {station} (string|nil) Station ID to play
+    
+    Returns: ~
+        (boolean) Success status
+
+require('nightride').stop()                                   *nightride.stop()*
+    Stop streaming
+
+require('nightride').toggle()                               *nightride.toggle()*
+    Toggle playback state
+    
+    Returns: ~
+        (boolean) Success status
+
+require('nightride').select()                               *nightride.select()*
+    Show station selection menu
+
+require('nightride').volume({vol})                          *nightride.volume()*
+    Set volume
+    
+    Parameters: ~
+        {vol} (number) Volume level (0-100)
+    
+    Returns: ~
+        (boolean) Success status
+
+require('nightride').volume_up()                         *nightride.volume_up()*
+    Increase volume by configured step
+    
+    Returns: ~
+        (boolean) Success status
+
+require('nightride').volume_down()                     *nightride.volume_down()*
+    Decrease volume by configured step
+    
+    Returns: ~
+        (boolean) Success status
+
+require('nightride').status()                               *nightride.status()*
+    Show current status information
+
+require('nightride').get_state()                         *nightride.get_state()*
+    Get current player state
+    
+    Returns: ~
+        (table) Player state with fields:
+            - is_playing (boolean)
+            - current_station (string|nil)
+            - volume (number)
+            - job_id (number|nil)
+            - player_cmd (string|nil)
+
+require('nightride').statusline()                       *nightride.statusline()*
+    Get status line component text
+    
+    Returns: ~
+        (string) Status line text
+
+require('nightride').list_stations()                 *nightride.list_stations()*
+    Get list of available stations
+    
+    Returns: ~
+        (table[]) Array of station objects with fields:
+            - id (string)
+            - name (string) 
+            - description (string)
+            - url (string)
+
+================================================================================
+STATUS LINE INTEGRATION                                     *nightride-statusline*
+
+Manual Integration ~
+
+For custom status lines, use the statusline() function: >
+    local nightride_status = require('nightride').statusline()
+<
+
+Lualine Integration ~
+
+Add nightride component to your lualine configuration: >
+    require('lualine').setup({
+        sections = {
+            lualine_x = {
+                require('nightride').lualine_component()
+            }
+        }
+    })
+<
+
+The component will automatically show/hide based on playback state.
+
+================================================================================
+KEYBINDINGS                                                 *nightride-keybindings*
+
+Default keybindings can be customized in setup configuration:
+
+<leader>np    Toggle playbook (play/pause)
+<leader>ns    Show station selection menu  
+<leader>n+    Increase volume
+<leader>n-    Decrease volume
+
+To disable default keybindings: >
+    require('nightride').setup({
+        keymaps = {
+            toggle = '',
+            select = '',
+            volume_up = '',
+            volume_down = '',
+        }
+    })
+<
+
+Manual Keybinding Setup ~
+
+You can set up custom keybindings manually: >
+    vim.keymap.set('n', '<F9>', require('nightride').toggle, 
+        { desc = 'Toggle Nightride' })
+    vim.keymap.set('n', '<F10>', require('nightride').select,
+        { desc = 'Select Nightride Station' })
+<
+
+================================================================================
+TROUBLESHOOTING                                         *nightride-troubleshooting*
+
+Audio Player Not Found ~
+
+Error: "No compatible audio player found"
+Solution: Install ffplay (via FFmpeg) or VLC:
+- Ubuntu/Debian: `sudo apt install ffmpeg` or `sudo apt install vlc`
+- macOS: `brew install ffmpeg` or `brew install vlc`
+- Windows: Install FFmpeg or VLC and ensure they're in your PATH
+
+Stream Not Starting ~
+
+Error: "Failed to start audio player"
+Possible causes:
+1. Internet connection issues
+2. Audio player not in PATH
+3. Audio system busy/locked
+
+Solutions:
+1. Check internet connectivity
+2. Verify player installation with `which ffplay` or `which vlc`
+3. Close other audio applications
+4. Try different player: set `player = 'vlc'` in configuration
+
+Volume Control Not Working ~
+
+Issue: Volume changes don't affect playback
+Cause: Volume control restarts the stream with new volume settings
+Note: This is expected behavior for stream-based volume control
+
+No Status Line Updates ~
+
+Issue: Status line doesn't show nightride status
+Solutions:
+1. Ensure `statusline.enabled = true` in configuration
+2. For custom status lines, manually integrate the statusline() function
+3. Force refresh with `:redrawstatus`
+
+Permission Errors ~
+
+Error: "Permission denied" when starting player
+Solutions:
+1. Check file permissions on audio player executable
+2. Verify user has audio device access
+3. Try running Neovim with appropriate permissions
+
+================================================================================
+vim:tw=78:ts=8:noet:ft=help:norl:
