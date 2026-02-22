@@ -18,6 +18,14 @@ A Neovim plugin for streaming music from nightride.fm - the home of synthwave ra
 - **Integration**: Background streaming via Neovim job control
 - **Detection priority**: mpv > ffplay > vlc (auto mode)
 
+## Recent Changes
+
+### Simplification (February 2026)
+- **Removed statusline integration**: Eliminated all statusline functionality to resolve freezing issues and reduce complexity
+- **Removed `:Nightride select` command**: Replaced interactive station selection with tab completion for `:Nightride start <station>`
+- **Streamlined configuration**: Reduced configuration options to focus on core streaming functionality
+- **Fixed stability issues**: Resolved lualine loading order problems and blocking operation freezes
+
 ## Plugin Architecture
 
 ### File Structure
@@ -29,7 +37,7 @@ nightride.nvim/
 │       ├── config.lua        # Configuration and defaults
 │       ├── player.lua        # Audio player management
 │       ├── stations.lua      # Station data and management
-│       ├── ui.lua           # Status line and selection menu
+│       ├── ui.lua           # UI utilities (no statusline)
 │       └── utils.lua        # Utility functions
 ├── plugin/
 │   └── nightride.lua        # Plugin entry point & commands
@@ -54,9 +62,10 @@ nightride.nvim/
 - [x] Automatic cleanup on Neovim exit
 
 ### 3. User Interface
-- [x] Status line integration showing: `♪ [Station] Volume%`
-- [x] Selection menu with snacks.nvim picker (+ `vim.ui.select()` fallback)
-- [x] Simple command-based interface
+- [x] Simple command-based interface with tab completion
+- [x] Configurable keybindings for core controls
+- ~~Status line integration~~ (removed for simplicity)
+- ~~Station selection menu~~ (removed in favor of tab completion)
 
 ### 4. Now Playing (Best Effort)
 - [ ] Attempt to parse stream metadata
@@ -66,16 +75,16 @@ nightride.nvim/
 ## Commands & Keybindings
 
 ### Commands
-- [x] `:Nightride start [station]` - Start streaming (default: nightride)
+- [x] `:Nightride start [station]` - Start streaming (with tab completion)
 - [x] `:Nightride stop` - Stop streaming
 - [x] `:Nightride toggle` - Toggle playback
-- [x] `:Nightride select` - Show station selection menu
+- ~~`:Nightride select`~~ - ~~Show station selection menu~~ (removed)
 - [x] `:Nightride volume [0-100]` - Set volume
 - [x] `:Nightride status` - Show current status
 
 ### Default Keybindings (configurable)
 - [x] `<leader>np` - Play/pause toggle
-- [x] `<leader>ns` - Station selection
+- ~~`<leader>ns`~~ - ~~Station selection~~ (removed)
 - [x] `<leader>n+` - Volume up
 - [x] `<leader>n-` - Volume down
 
@@ -93,17 +102,9 @@ require('nightride').setup({
     default_volume = 50,
     volume_step = 5,
     
-    -- Status line integration
-    statusline = {
-        enabled = true,
-        format = '♪ [%s] %d%%', -- station, volume
-        position = 'right',
-    },
-    
     -- Key mappings
     keymaps = {
         toggle = '<leader>np',
-        select = '<leader>ns',
         volume_up = '<leader>n+',
         volume_down = '<leader>n-',
     }
@@ -125,9 +126,10 @@ require('nightride').setup({
 - [x] Error handling and recovery
 
 ### Phase 3: User Interface
-- [x] Status line integration
-- [x] Station selection menu (snacks.nvim picker + vim.ui.select fallback)
-- [x] Command interface
+- [x] Command interface with tab completion
+- [x] Keybinding setup for core controls
+- ~~Status line integration~~ (removed for simplicity)
+- ~~Station selection menu~~ (removed in favor of tab completion)
 
 ### Phase 4: Integration & Polish
 - [x] Plugin entry point
@@ -143,11 +145,11 @@ require('nightride').setup({
 
 ## Success Criteria
 - [ ] All 7 stations stream successfully
-- [x] Volume control works smoothly
-- [x] Status line shows current state
-- [x] Selection menu is intuitive
+- [x] Volume control works smoothly  
+- [x] Tab completion provides easy station selection
+- [x] Simple, focused interface without UI complexity
 - [ ] No memory leaks or zombie processes
-- [ ] Clean integration with Neovim workflow
+- [x] Clean integration with Neovim workflow
 
 ## Future Enhancements (Post-MVP)
 - [ ] Favorite stations system
