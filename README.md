@@ -83,13 +83,6 @@ require('nightride').setup({
     default_volume = 50,
     volume_step = 5,
     
-    -- Status line integration
-    statusline = {
-        enabled = true,
-        format = '♪ [%s] %d%%',  -- station, volume
-        position = 'right',
-    },
-    
     -- Key mappings
     keymaps = {
         toggle = '<leader>np',

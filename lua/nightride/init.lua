@@ -44,7 +44,6 @@ function M.setup_keymaps()
   end
   
   map(opts.keymaps.toggle, M.toggle, 'Nightride: Toggle playback')
-  map(opts.keymaps.select, M.select, 'Nightride: Select station')
   map(opts.keymaps.volume_up, function() M.volume_up() end, 'Nightride: Volume up')
   map(opts.keymaps.volume_down, function() M.volume_down() end, 'Nightride: Volume down')
 end

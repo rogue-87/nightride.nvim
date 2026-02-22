@@ -41,7 +41,7 @@ function M.get()
 end
 
 ---Get a specific config value with dot notation
----@param key string Configuration key (e.g., 'statusline.enabled')
+---@param key string Configuration key (e.g., 'default_volume')
 ---@return any
 function M.get_option(key)
   local keys = vim.split(key, '.', { plain = true })

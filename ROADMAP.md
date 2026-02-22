@@ -37,7 +37,7 @@ nightride.nvim/
 │       ├── config.lua        # Configuration and defaults
 │       ├── player.lua        # Audio player management
 │       ├── stations.lua      # Station data and management
-│       ├── ui.lua           # UI utilities (no statusline)
+│       ├── ui.lua           # UI utilities
 │       └── utils.lua        # Utility functions
 ├── plugin/
 │   └── nightride.lua        # Plugin entry point & commands

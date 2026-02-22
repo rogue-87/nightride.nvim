@@ -70,7 +70,7 @@ function M.get_by_id(id)
   return nil
 end
 
----Get station IDs for selection menus
+---Get station IDs for tab completion
 ---@return string[]
 function M.get_ids()
   local ids = {}
@@ -80,7 +80,7 @@ function M.get_ids()
   return ids
 end
 
----Get formatted station list for selection menus
+---Get formatted station list for display
 ---@return string[]
 function M.get_display_names()
   local names = {}
@@ -90,8 +90,8 @@ function M.get_display_names()
   return names
 end
 
----Get station from display name (for selection callbacks)
----@param display_name string Display name from selection menu
+---Get station from display name
+---@param display_name string Display name
 ---@return nightride.Station|nil
 function M.get_by_display_name(display_name)
   for _, station in ipairs(M.stations) do

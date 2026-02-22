@@ -12,9 +12,8 @@ CONTENTS                                                     *nightride-contents
     4. Configuration ................................ |nightride-configuration|
     5. Commands ..................................... |nightride-commands|
     6. API Functions ................................ |nightride-api|
-    7. Status Line Integration ...................... |nightride-statusline|
-    8. Keybindings .................................. |nightride-keybindings|
-    9. Troubleshooting .............................. |nightride-troubleshooting|
+    7. Keybindings .................................. |nightride-keybindings|
+    8. Troubleshooting .............................. |nightride-troubleshooting|
 
 ================================================================================
 INTRODUCTION                                             *nightride-introduction*
@@ -26,7 +25,6 @@ workflow, allowing you to listen to high-quality electronic music while coding.
 Features:
 - Stream from 7 different nightride.fm stations
 - Seamless volume control via mpv IPC (no stream restart)
-- Status line integration 
 - Configurable keybindings
 - Support for mpv (recommended), ffplay, and VLC media players
 
@@ -87,13 +85,6 @@ Default configuration: >
         default_volume = 50,
         volume_step = 5,
         
-        -- Status line integration
-        statusline = {
-            enabled = true,
-            format = '♪ [%s] %d%%',  -- station, volume
-            position = 'right',
-        },
-        
         -- Key mappings
         keymaps = {
             toggle = '<leader>np',
@@ -120,11 +111,6 @@ Configuration Options:
 *nightride-config-volume*
     default_volume (number): Initial volume (0-100)
     volume_step (number): Amount to adjust volume with up/down commands
-
-*nightride-config-statusline*
-    statusline.enabled (boolean): Enable status line integration
-    statusline.format (string): Format string (%s=station, %d=volume)
-    statusline.position (string): Position hint for status line plugins
 
 *nightride-config-keymaps*
     keymaps.toggle (string): Keymap for play/pause toggle
@@ -215,12 +201,6 @@ require('nightride').get_state()                         *nightride.get_state()*
             - job_id (number|nil)
             - player_cmd (string|nil)
 
-require('nightride').statusline()                       *nightride.statusline()*
-    Get status line component text
-    
-    Returns: ~
-        (string) Status line text
-
 require('nightride').list_stations()                 *nightride.list_stations()*
     Get list of available stations
     
@@ -230,23 +210,6 @@ require('nightride').list_stations()                 *nightride.list_stations()*
             - name (string) 
             - description (string)
             - url (string)
-
-================================================================================
-STATUS LINE INTEGRATION                                     *nightride-statusline*
-
-Manual Integration ~
-
-For custom status lines, use the statusline() function: >
-    local nightride_status = require('nightride').statusline()
-<
-
-The `statusline()` function returns:
-- Empty string when not playing
-- `"♪ [Station Name] 75%"` when playing (format configurable)
-
-Example: Add to vim's built-in statusline: >
-    vim.o.statusline = '%f %m%=[NIGHTRIDE: %{luaeval("require(\\"nightride\\").statusline()")}] %p%% %l:%c'
-<
 
 ================================================================================
 KEYBINDINGS                                                 *nightride-keybindings*
@@ -304,14 +267,6 @@ Volume Control Not Working ~
 Issue: Volume changes don't affect playback
 Note: With mpv, volume is adjusted seamlessly via IPC socket.
       With ffplay/vlc, volume changes restart the stream (brief interruption).
-
-No Status Line Updates ~
-
-Issue: Status line doesn't show nightride status
-Solutions:
-1. Ensure `statusline.enabled = true` in configuration
-2. For custom status lines, manually integrate the statusline() function
-3. Force refresh with `:redrawstatus`
 
 Permission Errors ~
 

@@ -2,7 +2,7 @@ local M = {}
 
 ---Initialize UI components
 function M.setup()
-  -- UI setup complete - no statusline integration
+  -- UI setup complete
 end
 
 ---Show current status information
