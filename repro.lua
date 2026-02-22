@@ -6,6 +6,7 @@ vim.o.shiftwidth = 4
 
 -- Run with `nvim -u repro.lua`
 vim.env.LAZY_STDPATH = ".repro"
+---@diagnostic disable-next-line: need-check-nil
 load(vim.fn.system("curl -s https://raw.githubusercontent.com/folke/lazy.nvim/main/bootstrap.lua"))()
 
 ---@diagnostic disable-next-line: missing-fields
