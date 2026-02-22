@@ -45,6 +45,18 @@ require("lazy.minit").repro({
 				{ "<leader>n-", "<cmd>Nightride volume " .. math.max(0, (vim.g.nightride_volume or 50) - 10) .. "<cr>", desc = "Nightride: Volume Down" },
 			},
 		},
+		-- Add snacks.nvim for enhanced picker UI
+		{
+			"folke/snacks.nvim",
+			priority = 1000,
+			lazy = false,
+			config = function()
+				require("snacks").setup({
+					picker = { enabled = true },
+					notifier = { enabled = true },
+				})
+			end
+		},
 		-- Add lualine for status line testing
 		{
 			"nvim-lualine/lualine.nvim",
