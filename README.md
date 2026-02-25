@@ -6,7 +6,7 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 
 - 🎵 Stream from 7 different nightride.fm stations
 - 🔊 Volume control from within Neovim
-- 📊 Status line integration
+- 📊 Status line integration (not yet)
 - ⌨️ Configurable keybindings
 - 🎮 Support for mpv (recommended), ffplay, and VLC media players
 - 🎚️ Seamless volume control via mpv IPC (no stream restart)
