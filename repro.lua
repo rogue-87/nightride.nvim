@@ -3,6 +3,7 @@ vim.g.maplocalleader = "\\"
 
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
+vim.o.clipboard = "unnamedplus"
 
 -- Run with `nvim -u repro.lua`
 vim.env.LAZY_STDPATH = ".repro"

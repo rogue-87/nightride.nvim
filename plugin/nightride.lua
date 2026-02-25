@@ -6,6 +6,10 @@ if vim.g.loaded_nightride then
 end
 vim.g.loaded_nightride = 1
 
+if vim.health and vim.health.register then
+	vim.health.register("nightride", require("nightride.health").check)
+end
+
 -- Create the main command
 vim.api.nvim_create_user_command("Nightride", function(opts)
 	require("nightride")._command_handler(opts)

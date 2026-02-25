@@ -3,15 +3,42 @@ local player = require("nightride.player")
 local stations = require("nightride.stations")
 local ui = require("nightride.ui")
 local state = require("nightride.state")
+local version = require("nightride.version")
 
 local M = {}
 
 -- Plugin state
 local initialized = false
 
+local function check_nvim_version()
+	local current = vim.version()
+	local required = vim.version.parse(version.min_nvim_version)
+	if not current or not required then
+		return true
+	end
+	if current.major < required.major or (current.major == required.major and current.minor < required.minor) then
+		vim.notify(
+			string.format(
+				"nightride.nvim requires Neovim >= %s (current: %d.%d.%d)",
+				version.min_nvim_version,
+				current.major,
+				current.minor,
+				current.patch
+			),
+			vim.log.levels.WARN
+		)
+		return false
+	end
+	return true
+end
+
 ---Setup the plugin with user options
 ---@param opts nightride.Config|nil User configuration options
 function M.setup(opts)
+	if not check_nvim_version() then
+		return false
+	end
+
 	-- Configure the plugin
 	config.setup(opts)
 
@@ -228,5 +255,7 @@ function M._command_handler(opts)
 		vim.notify("Available commands: start, stop, toggle, volume, status", vim.log.levels.INFO)
 	end
 end
+
+M.version = version.version
 
 return M
