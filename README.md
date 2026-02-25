@@ -37,34 +37,34 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 
 ```lua
 {
-    'rogue-87/nightride.nvim',
+    "rogue-87/nightride.nvim",
     config = function()
-        require('nightride').setup()
-    end
+        require("nightride").setup()
+    end,
 }
 ```
 
 ### packer.nvim
 
 ```lua
-use {
-    'rogue-87/nightride.nvim',
+use({
+    "rogue-87/nightride.nvim",
     config = function()
-        require('nightride').setup()
-    end
-}
+        require("nightride").setup()
+    end,
+})
 ```
 
 ### vim-plug
 
 ```vim
-Plug 'rogue-87/nightride.nvim'
+Plug "rogue-87/nightride.nvim"
 ```
 
 Then add to your `init.lua`:
 
 ```lua
-require('nightride').setup()
+require("nightride").setup()
 ```
 
 ## Configuration
@@ -72,23 +72,23 @@ require('nightride').setup()
 Default configuration:
 
 ```lua
-require('nightride').setup({
+require("nightride").setup({
     -- Audio player preference
-    player = 'auto',  -- 'mpv', 'ffplay', 'vlc', 'auto'
-    
+    player = "auto", -- 'mpv', 'ffplay', 'vlc', 'auto'
+
     -- Default station
-    default_station = 'nightride',
-    
+    default_station = "nightride",
+
     -- Volume settings
     default_volume = 50,
     volume_step = 5,
-    
+
     -- Key mappings
     keymaps = {
-        toggle = '<leader>np',
-        volume_up = '<leader>n+',
-        volume_down = '<leader>n-',
-    }
+        toggle = "<leader>np",
+        volume_up = "<leader>n+",
+        volume_down = "<leader>n-",
+    },
 })
 ```
 
@@ -114,10 +114,10 @@ require('nightride').setup({
 The plugin provides a comprehensive API for integration:
 
 ```lua
-local nightride = require('nightride')
+local nightride = require("nightride")
 
 -- Basic controls
-nightride.start('nightride')  -- Start specific station
+nightride.start("nightride")  -- Start specific station
 nightride.stop()              -- Stop playback
 nightride.toggle()            -- Toggle playback
 
