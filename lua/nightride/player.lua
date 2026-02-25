@@ -81,6 +81,10 @@ function M.stop()
 
 	M.state.is_playing = false
 	M.state.current_station = nil
+
+	vim.api.nvim_exec_autocmds("User", {
+		pattern = "NightrideStateChanged",
+	})
 end
 
 ---Start playback for a station
@@ -114,6 +118,10 @@ function M.start(station_id, url)
 			M.state.current_station = nil
 			M.state.job_id = nil
 
+			vim.api.nvim_exec_autocmds("User", {
+				pattern = "NightrideStateChanged",
+			})
+
 			if exit_code ~= 0 and exit_code ~= 130 and exit_code ~= 143 then
 				vim.schedule(function()
 					vim.notify(string.format("Stream ended unexpectedly (code: %d)", exit_code), vim.log.levels.WARN)
@@ -137,6 +145,10 @@ function M.start(station_id, url)
 	M.state.job_id = job_id
 	M.state.is_playing = true
 	M.state.current_station = station_id
+
+	vim.api.nvim_exec_autocmds("User", {
+		pattern = "NightrideStateChanged",
+	})
 
 	return true
 end
@@ -196,17 +208,14 @@ function M.set_volume(new_volume)
 
 	if M.state.is_playing and M.state.current_station then
 		if utils.supports_ipc(M.state.player_cmd) then
-			-- mpv: seamless volume change via IPC socket
 			set_volume_ipc(clamped_volume)
 		else
-			-- ffplay/vlc: must restart stream with new volume args
 			local success = set_volume_restart(clamped_volume, old_volume)
 			if not success then
 				return false
 			end
 		end
 
-		-- Save volume change (debounced to avoid excessive I/O)
 		if save_timer then
 			save_timer:stop()
 		end
@@ -216,10 +225,12 @@ function M.set_volume(new_volume)
 				last_station = M.state.current_station,
 			}
 			state.save(current_state)
-		end, 1000) -- 1 second debounce
-
-		return true
+		end, 1000)
 	end
+
+	vim.api.nvim_exec_autocmds("User", {
+		pattern = "NightrideStateChanged",
+	})
 
 	return true
 end

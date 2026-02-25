@@ -19,7 +19,6 @@ require("lazy.minit").repro({
 			dev = true,
 			config = function()
 				require("nightride").setup({
-					-- Test configuration
 					player = "auto",
 					default_station = "nightride",
 					default_volume = 50,
@@ -44,6 +43,25 @@ require("lazy.minit").repro({
 					desc = "Nightride: Volume Down",
 				},
 			},
+		},
+		{
+			"nvim-lualine/lualine.nvim",
+			event = "VeryLazy",
+			config = function()
+				local statusline = require("nightride.statusline")
+				statusline.setup()
+
+				require("lualine").setup({
+					options = {
+						theme = "auto",
+					},
+					sections = {
+						lualine_c = {
+							statusline.component,
+						},
+					},
+				})
+			end,
 		},
 	},
 })
