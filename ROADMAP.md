@@ -54,7 +54,7 @@ A Neovim plugin for streaming music from nightride.fm - the home of synthwave ra
 
 - [x] Simple command-based interface with tab completion
 - [x] Configurable keybindings for core controls
-- [ ] **(RE-IMPLEMENT)** Non-blocking status line integration
+- [x] **(RE-IMPLEMENT)** Non-blocking status line integration
 
 ### 4. Now Playing (Best Effort)
 
@@ -122,11 +122,11 @@ require('nightride').setup({
 
 ### Phase 3: Non-Blocking Statusline & UI
 
-- [ ] **[NEXT]** Expose a public function `require('nightride').get_status()` for statusline components.
-- [ ] **[NEXT]** The function will read from `player.state` and return a simple formatted string (e.g., " Nightride"). It must not perform any blocking operations.
-- [ ] **[NEXT]** Implement a `User NightrideStateChanged` autocommand that fires on any state change (play, pause, stop, station change).
-- [ ] **[NEXT]** Provide documentation for integrating with `lualine` using the new function and autocommand.
-- [ ] Add a `show_notifications` configuration flag.
+- [x] **[NEXT]** Expose a public function `require('nightride').get_status()` for statusline components.
+- [x] **[NEXT]** The function will read from `player.state` and return a simple formatted string (e.g., " Nightride"). It must not perform any blocking operations.
+- [x] **[NEXT]** Implement a `User NightrideStateChanged` autocommand that fires on any state change (play, pause, stop, station change).
+- [x] **[NEXT]** Provide documentation for integrating with `lualine` using the new function and autocommand.
+- [x] Add a `show_notifications` configuration flag.
 
 ### Phase 4: Integration & Polish
 
