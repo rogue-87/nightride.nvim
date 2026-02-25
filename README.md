@@ -6,7 +6,7 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 
 - 🎵 Stream from 7 different nightride.fm stations
 - 🔊 Volume control from within Neovim
-- 📊 Status line integration (not yet)
+- 📊 Status line integration (via lualine or custom)
 - ⌨️ Configurable keybindings
 - 🎮 Support for mpv (recommended), ffplay, and VLC media players
 - 🎚️ Seamless volume control via mpv IPC (no stream restart)
@@ -24,7 +24,7 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 
 ## Requirements
 
-- Neovim 0.7.0 or later
+- Neovim 0.11 or later
 - One of the following audio players (in order of preference):
   - `mpv` (recommended - enables seamless volume control via IPC)
   - `ffplay` (part of FFmpeg - volume changes restart stream)
@@ -44,21 +44,10 @@ A Neovim plugin for streaming music from [nightride.fm](https://nightride.fm) - 
 }
 ```
 
-### packer.nvim
+### vim.pack (nvim 0.12+)
 
 ```lua
-use({
-    "rogue-87/nightride.nvim",
-    config = function()
-        require("nightride").setup()
-    end,
-})
-```
-
-### vim-plug
-
-```vim
-Plug "rogue-87/nightride.nvim"
+vim.pack.add("https://github.com/rogue-87/nightride.nvim")
 ```
 
 Then add to your `init.lua`:
@@ -131,6 +120,26 @@ nightride.status()            -- Show status
 nightride.get_state()         -- Get player state
 nightride.list_stations()     -- Get available stations
 ```
+
+## Status Line Integration
+
+nightride.nvim provides a statusline component for lualine:
+
+```lua
+-- In your lualine config
+require("lualine").setup({
+    sections = {
+        lualine_c = {
+            require("nightride.statusline").component,
+        },
+    },
+})
+```
+
+The statusline module also exposes:
+
+- `require("nightride.statusline").refresh()` - Manually refresh the cache
+- `require("nightride.statusline").setup()` - Initialize the statusline module
 
 ## Testing
 

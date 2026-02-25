@@ -3,17 +3,18 @@
 Author: nightride.nvim contributors
 License: MIT
 
-================================================================================
-CONTENTS                                                     *nightride-contents*
+ ================================================================================
+ CONTENTS                                                     *nightride-contents*
 
-    1. Introduction ................................. |nightride-introduction|
-    2. Requirements ................................. |nightride-requirements|
-    3. Installation ................................. |nightride-installation|
-    4. Configuration ................................ |nightride-configuration|
-    5. Commands ..................................... |nightride-commands|
-    6. API Functions ................................ |nightride-api|
-    7. Keybindings .................................. |nightride-keybindings|
-    8. Troubleshooting .............................. |nightride-troubleshooting|
+     1. Introduction ................................. |nightride-introduction|
+     2. Requirements ................................. |nightride-requirements|
+     3. Installation ................................. |nightride-installation|
+     4. Configuration ................................ |nightride-configuration|
+     5. Commands ..................................... |nightride-commands|
+     6. API Functions ................................ |nightride-api|
+     7. Keybindings .................................. |nightride-keybindings|
+     8. Status Line ................................. |nightride-statusline|
+     9. Troubleshooting .............................. |nightride-troubleshooting|
 
 ================================================================================
 INTRODUCTION                                             *nightride-introduction*
@@ -25,13 +26,14 @@ workflow, allowing you to listen to high-quality electronic music while coding.
 Features:
 - Stream from 7 different nightride.fm stations
 - Seamless volume control via mpv IPC (no stream restart)
+- Status line integration (lualine support)
 - Configurable keybindings
 - Support for mpv (recommended), ffplay, and VLC media players
 
 ================================================================================
 REQUIREMENTS                                             *nightride-requirements*
 
-- Neovim 0.7.0 or later
+- Neovim 0.11 or later
 - One of the following audio players (in order of preference):
   - mpv (recommended - seamless volume control via IPC)
   - ffplay (part of FFmpeg - volume changes restart stream)
@@ -230,15 +232,54 @@ To disable default keybindings: >
     })
 <
 
-Manual Keybinding Setup ~
+ Manual Keybinding Setup ~
 
-You can set up custom keybindings manually: >
-    vim.keymap.set('n', '<F9>', require('nightride').toggle, 
-        { desc = 'Toggle Nightride' })
-<
+ You can set up custom keybindings manually: >
+     vim.keymap.set('n', '<F9>', require('nightride').toggle, 
+         { desc = 'Toggle Nightride' })
+ <
 
-================================================================================
-TROUBLESHOOTING                                         *nightride-troubleshooting*
+ ================================================================================
+ STATUS LINE                                               *nightride-statusline*
+
+ nightride.nvim provides a statusline component for integration with lualine.
+
+ Using with lualine.nvim: >
+
+     require('lualine').setup({
+         sections = {
+             lualine_c = {
+                 require('nightride.statusline').component,
+             },
+         },
+     })
+
+     -- Initialize the statusline module
+     require('nightride.statusline').setup()
+ <
+
+ Status Line API: •
+
+ *nightride.statusline.setup()*
+     Initialize the statusline module. Sets up autocmds to refresh the
+     statusline when playback state changes.
+
+ *nightride.statusline.refresh()*
+     Manually refresh the cached player state. Called automatically on
+     playback state changes.
+
+ *nightride.statusline.component*
+     Returns the formatted statusline string showing current station and
+     volume when playing, or "--" when stopped.
+
+ Events ~
+
+ The plugin fires |User| events when state changes: •
+
+     :autocmd User NightrideStateChanged echom "State changed!"
+
+ ================================================================================
+ TROUBLESHOOTING                                         *nightride-troubleshooting*
 
 Audio Player Not Found ~
 
